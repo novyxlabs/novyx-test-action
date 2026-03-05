@@ -1,0 +1,46 @@
+name: 'Novyx Memory Integrity Check'
+description: 'Run memory integrity checks against the Novyx API in your CI pipeline'
+author: 'novyxlabs'
+
+branding:
+  icon: 'shield'
+  color: 'purple'
+
+inputs:
+  api-key:
+    description: 'Novyx API key (nram_...)'
+    required: true
+  base-url:
+    description: 'Novyx API base URL'
+    required: false
+    default: 'https://novyx-ram-api.fly.dev'
+  checks:
+    description: 'Comma-separated checks to run: audit_health,integrity,stats'
+    required: false
+    default: 'audit_health,stats'
+  fail-on-error:
+    description: 'Fail the workflow if any check fails'
+    required: false
+    default: 'true'
+
+outputs:
+  audit-healthy:
+    description: 'Whether the audit chain is healthy (true/false)'
+  memory-count:
+    description: 'Total number of memories'
+  integrity-valid:
+    description: 'Whether all memories pass integrity checks (true/false)'
+  summary:
+    description: 'JSON summary of all check results'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Novyx integrity checks
+      shell: bash
+      env:
+        NOVYX_API_KEY: ${{ inputs.api-key }}
+        NOVYX_BASE_URL: ${{ inputs.base-url }}
+        NOVYX_CHECKS: ${{ inputs.checks }}
+        NOVYX_FAIL_ON_ERROR: ${{ inputs.fail-on-error }}
+      run: ${{ github.action_path }}/check.sh
